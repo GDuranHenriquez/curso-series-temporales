@@ -1,14 +1,14 @@
 library(forecast)
-
+library(tseries)
 # Dataset de linces 
-# N˙mero de linces atrapados por aÒo en el perÌodo 1821-1934 en Canad·
+# N?mero de linces atrapados por a?o en el per?odo 1821-1934 en Canad?
 length(lynx)
 
 plot(lynx)
 
-# Parece estacionario pero probablemente haya autocorrelaciÛn 
-# Si se capturan muchos linces un aÒo, se espera que al Òo sgte hayan menos porque hay menos para reproducirse.
-# Vemos un pulso cÌclico que son los puntos m·ximos, no hay estacionalidad pero hay un patrÛn
+# Parece estacionario pero probablemente haya autocorrelaci?n 
+# Si se capturan muchos linces un a?o, se espera que al ?o sgte hayan menos porque hay menos para reproducirse.
+# Vemos un pulso c?clico que son los puntos m?ximos, no hay estacionalidad pero hay un patr?n
 
 # Es estacionaria
 adf.test(lynx)
@@ -27,9 +27,30 @@ auto.arima(lynx, trace = T)
 myarima=auto.arima(lynx, trace = T, 
            stepwise = F, 
            approximation = F)
-### ARIMA Forecast
+#Obt√©n el valor del logaritmo de la verosimilitud (LL) y el AIC para el modelo AR(4) que estimamos con auto.arima.
+ll_aic = c(myarima$loglik, myarima$aic)
+ll_aic
 
-# Forecast de 10 aÒos
+#> myarima
+#considera hasta el orden 4
+
+#¬øRecuerdas la funci√≥n de autocorrelaci√≥n parcial? ¬øCu√°l era el √∫ltimo retraso que sal√≠a significativo?
+# Resp. El ultimo retrazo significativo era el 8vo.
+
+# Seg√∫n la documentaci√≥n de auto.arima, los √≥rdenes m√°ximos que se consideran por defecto son:
+# max.p = 5 y max.q = 5. Esto explica por qu√© el modelo no explora √≥rdenes mayores,
+# a menos que se especifique un l√≠mite mayor manualmente.
+
+myarima=auto.arima(lynx, trace = T, stepwise = F, approximation = F, max.order=8, max.p=8)
+# Best model: ARIMA(8,0,0) with non-zero mean
+ll_aic_8_0_0 = c(myarima$loglik, myarima$aic)
+ll_aic_8_0_0
+ll_aic
+# Si consideramos el modelo de menor LL y mayor AIC, nos quedariamos con el modelo ARIMA(8,0,0), 
+#ya esta comparaci√≥n indica que es mejor modelo.
+
+### ARIMA Forecast
+# Forecast de 10 a?os
 arimafore <- forecast(myarima, h = 10)
 
 plot(arimafore)
